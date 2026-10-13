@@ -11,7 +11,25 @@
     scrollTo(0, 0);
     addEventListener('load', () => scrollTo(0, 0));
   }
+
   document.getElementById('yr').textContent = new Date().getFullYear();
+
+  const hero = document.querySelector('.hero');
+  const bar = document.getElementById('bar');
+  const para = document.querySelector('[data-words]');
+  const hasIO = 'IntersectionObserver' in window;
+
+  // Run something when an element enters / leaves the screen
+  const watch = (el, cb) => {
+    if (!el || !hasIO) return;
+    new IntersectionObserver((entries) => cb(entries[entries.length - 1].isIntersecting)).observe(el);
+  };
+
+  // Pause endless CSS animations while they are off screen
+  let heroVisible = true;
+  watch(hero, (on) => { heroVisible = on; hero.classList.toggle('off', !on); });
+  const field = document.querySelector('.float-field');
+  watch(field, (on) => field.classList.toggle('off', !on));
 
   // Rotating word in the hero headline
   const rot = document.getElementById('rot');
@@ -19,6 +37,7 @@
   let w = 0;
   if (!reduce) {
     setInterval(() => {
+      if (document.hidden || !heroVisible) return;
       rot.classList.add('out');
       setTimeout(() => {
         w = (w + 1) % words.length;
@@ -29,17 +48,25 @@
   }
 
   // Apple-style paragraph: words light up as you scroll
-  const para = document.querySelector('[data-words]');
+  const frag = document.createDocumentFragment();
   const spans = para.textContent.trim().split(/\s+/).map((t) => {
     const s = document.createElement('span');
     s.textContent = t + ' ';
+    frag.appendChild(s);
     return s;
   });
   para.textContent = '';
-  spans.forEach((s) => para.appendChild(s));
+  para.appendChild(frag);
+  let lit = 0;
+  const setLit = (n) => {
+    if (n === lit) return;
+    if (n > lit) for (let i = lit; i < n; i++) spans[i].classList.add('on');
+    else for (let i = n; i < lit; i++) spans[i].classList.remove('on');
+    lit = n;
+  };
 
   // Count-up numbers
-  const countIO = new IntersectionObserver((entries) => {
+  const countIO = hasIO && new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (!e.isIntersecting) return;
       const el = e.target, end = +el.dataset.count, suffix = el.dataset.count === '3' ? '+' : '';
@@ -54,7 +81,9 @@
       requestAnimationFrame(tick);
     });
   }, { threshold: 0.6 });
-  document.querySelectorAll('[data-count]').forEach((el) => countIO.observe(el));
+  document.querySelectorAll('[data-count]').forEach((el) => {
+    if (countIO) countIO.observe(el); else el.textContent = el.dataset.count + (el.dataset.count === '3' ? '+' : '');
+  });
 
   // Scroll-scrubbed reveal: content appears gradually as you scroll,
   // so a slow scroll reveals it slowly. Items in a group arrive one after another.
@@ -66,59 +95,100 @@
   });
   const items = [...document.querySelectorAll('.reveal')].map((el) => ({
     el,
+    fi: el.classList.contains('fi'),
     delay: Math.min([...el.parentElement.children].filter((c) => c.classList.contains('reveal')).indexOf(el) * 0.09, 0.6),
+    p: -1,
+    done: false,
   }));
+  const tops = new Float32Array(items.length);
   const ease = (x) => 1 - Math.pow(1 - x, 3);
-  const hero = document.querySelector('.hero');
-  const bar = document.getElementById('bar');
+
+  const paint = (it, p) => {
+    const el = it.el;
+    if (p >= 0.999) {
+      if (!it.done) {
+        it.done = true; it.p = 1;
+        el.style.opacity = ''; el.style.transform = ''; el.style.scale = '';
+        el.classList.add('done');
+      }
+      return;
+    }
+    if (it.done) { it.done = false; el.classList.remove('done'); }
+    if (Math.abs(p - it.p) < 0.004) return;
+    it.p = p;
+    el.style.opacity = p;
+    if (it.fi) el.style.scale = 0.5 + 0.5 * p;
+    else el.style.transform = 'translate3d(0,' + ((1 - p) * 44) + 'px,0) scale(' + (0.94 + 0.06 * p) + ')';
+  };
+
+  // Cached page measurements (re-measured only when the size changes, not every scroll frame)
+  let vh = innerHeight, max = 0, lastHp = -1, lastBar = -1;
+  const measure = () => { vh = innerHeight; max = root.scrollHeight - vh; };
 
   const update = () => {
-    const vh = innerHeight;
-    const max = root.scrollHeight - vh;
-    const atBottom = scrollY >= max - 2;
-    bar.style.transform = 'scaleX(' + (max > 0 ? scrollY / max : 0) + ')';
+    const y = scrollY;
+    const atBottom = y >= max - 2;
+
+    // 1) read everything first (one layout pass)
+    for (let i = 0; i < items.length; i++) tops[i] = items[i].el.getBoundingClientRect().top;
+    const pr = para.getBoundingClientRect();
+
+    // 2) then write
+    const b = max > 0 ? Math.round((y / max) * 1000) / 1000 : 0;
+    if (b !== lastBar) { lastBar = b; bar.style.transform = 'scaleX(' + b + ')'; }
 
     // hero eases away as you scroll down
     if (!reduce) {
-      const hp = Math.min(scrollY / (vh * 0.8), 1);
-      hero.style.opacity = String(1 - hp);
-      hero.style.transform = 'translateY(' + (-hp * 40) + 'px) scale(' + (1 - hp * 0.05) + ')';
+      const hp = Math.round(Math.min(y / (vh * 0.8), 1) * 200) / 200;
+      if (hp !== lastHp) {
+        lastHp = hp;
+        hero.style.opacity = String(1 - hp);
+        hero.style.transform = 'translate3d(0,' + (-hp * 40) + 'px,0) scale(' + (1 - hp * 0.05) + ')';
+      }
     }
 
     // reveal items (progress 0 at the bottom edge of the screen, 1 a bit higher up)
-    items.forEach(({ el, delay }) => {
-      const top = el.getBoundingClientRect().top;
-      let p = reduce ? 1 : (vh * 0.96 - top) / (vh * 0.28) - delay;
-      if (atBottom && top < vh) p = 1;
-      p = ease(Math.min(Math.max(p, 0), 1));
-      el.style.setProperty('--p', p.toFixed(3));
-      el.classList.toggle('done', p >= 0.999);
-    });
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      let p = reduce ? 1 : (vh * 0.96 - tops[i]) / (vh * 0.28) - it.delay;
+      if (atBottom && tops[i] < vh) p = 1;
+      paint(it, ease(Math.min(Math.max(p, 0), 1)));
+    }
 
     // words light up in the About paragraph
-    const r = para.getBoundingClientRect();
-    const pp = Math.min(Math.max((vh * 0.85 - r.top) / (r.height + vh * 0.3), 0), 1);
-    const n = reduce ? spans.length : Math.round(pp * spans.length);
-    spans.forEach((s, i) => s.classList.toggle('on', i < n));
+    const pp = Math.min(Math.max((vh * 0.85 - pr.top) / (pr.height + vh * 0.3), 0), 1);
+    setLit(reduce ? spans.length : Math.round(pp * spans.length));
   };
 
   let ticking = false;
-  addEventListener('scroll', () => {
-    if (!ticking) { ticking = true; requestAnimationFrame(() => { update(); ticking = false; }); }
-  }, { passive: true });
-  addEventListener('resize', update);
-  addEventListener('load', update);
+  const schedule = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; update(); });
+  };
+  const remeasure = () => { measure(); schedule(); };
+
+  addEventListener('scroll', schedule, { passive: true });
+  addEventListener('resize', remeasure);
+  addEventListener('orientationchange', remeasure);
+  addEventListener('load', remeasure);
+  if ('ResizeObserver' in window) new ResizeObserver(remeasure).observe(document.body);
+  measure();
   update();
 
   // Subtle 3D tilt on project cards (mouse only)
-  if (!reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (!reduce && !root.classList.contains('lite') && finePointer) {
     document.querySelectorAll('.card').forEach((card) => {
+      let box = null;
+      card.addEventListener('pointerenter', () => { box = card.getBoundingClientRect(); });
       card.addEventListener('pointermove', (e) => {
-        const b = card.getBoundingClientRect();
+        if (!card.classList.contains('done')) return;
+        const b = box || (box = card.getBoundingClientRect());
         const x = (e.clientX - b.left) / b.width - 0.5, y = (e.clientY - b.top) / b.height - 0.5;
         card.style.transform = 'rotateY(' + x * 8 + 'deg) rotateX(' + -y * 8 + 'deg) translateZ(0)';
       });
-      card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+      card.addEventListener('pointerleave', () => { box = null; card.style.transform = ''; });
     });
   }
 
@@ -144,7 +214,7 @@
   mark();
 
   // Custom cursor (desktop / laptop with a mouse or trackpad only)
-  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  if (finePointer) {
     const dot = document.createElement('div');
     const ring = document.createElement('div');
     dot.className = 'cur-dot';
@@ -154,12 +224,24 @@
     document.body.append(ring, dot);
     root.classList.add('has-cursor');
 
-    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, shown = false;
+    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, shown = false, raf = 0;
+
+    // ring trails the dot smoothly, and the loop stops once it catches up (no idle work)
+    const follow = () => {
+      const k = reduce ? 1 : 0.2;
+      rx += (mx - rx) * k;
+      ry += (my - ry) * k;
+      if (Math.abs(mx - rx) < 0.1 && Math.abs(my - ry) < 0.1) { rx = mx; ry = my; raf = 0; }
+      else raf = requestAnimationFrame(follow);
+      ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0) translate(-50%,-50%)';
+    };
+
     addEventListener('pointermove', (e) => {
       if (e.pointerType === 'touch') return;
       mx = e.clientX; my = e.clientY;
-      dot.style.transform = 'translate(' + mx + 'px,' + my + 'px) translate(-50%,-50%)';
+      dot.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0) translate(-50%,-50%)';
       if (!shown) { shown = true; rx = mx; ry = my; root.classList.add('cursor-on'); }
+      if (!raf) raf = requestAnimationFrame(follow);
     }, { passive: true });
     document.addEventListener('mouseleave', () => root.classList.remove('cursor-on'));
     document.addEventListener('mouseenter', () => { if (shown) root.classList.add('cursor-on'); });
@@ -174,14 +256,5 @@
     document.addEventListener('pointerout', (e) => {
       if (e.target.closest && e.target.closest(hot)) root.classList.remove('cursor-hot');
     });
-
-    // ring trails the dot smoothly
-    const follow = () => {
-      rx += (mx - rx) * (reduce ? 1 : 0.18);
-      ry += (my - ry) * (reduce ? 1 : 0.18);
-      ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)';
-      requestAnimationFrame(follow);
-    };
-    requestAnimationFrame(follow);
   }
 })();
