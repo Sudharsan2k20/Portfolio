@@ -6,6 +6,8 @@
 <meta name="description" content="Sudharsan, Software Test Engineer and developer with 3+ years of experience.">
 <title>Sudharsan | Software Test Engineer</title>
 <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>/* lite mode: phones, low-memory / few-core devices and data-saver get lighter effects */
+try{var n=navigator,c=n.hardwareConcurrency||8,m=n.deviceMemory||8,s=n.connection&&n.connection.saveData;if(c<=4||m<=4||s||matchMedia('(max-width:760px)').matches)document.documentElement.classList.add('lite')}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,8 +27,8 @@
 </nav>
 
 <header class="hero" id="top">
-  <h1>Hello there, I'm Sudharsan.<br><span class="grad">I <span id="rot">test</span>.</span></h1>
-  <p class="sub">Software Test Engineer at Tristha Global, and a Software Developer by passion.</p>
+  <h1>Hi, I'm Sudharsan.<br><span class="grad">I <span id="rot">test</span>.</span></h1>
+  <p class="sub">Software Test Engineer at Tristha Global, and a software developer by passion.</p>
   <div class="cta">
     <a class="btn primary" href="#projects">See my projects</a>
     <a class="btn" href="mailto:sudharsanm204@gmail.com" target="_blank" rel="noopener">Email me</a>
@@ -53,8 +55,8 @@
   <section id="about" class="wrap">
     <h2 class="reveal">About me</h2>
     <p class="big" data-words>With three years across software development and software testing, I understand the full lifecycle: designing and building applications, testing their functionality, finding defects, and delivering a reliable user experience.</p>
-    <p class="lead reveal">I worked with PHP, CodeIgniter, AngularJS, JavaScript, MySQL, HTML, CSS and Bootstrap, with hands-on skills in backend development, database management, API integration and debugging, and I collaborate closely with development teams.</p>
-    <p class="lead reveal">I have tested end-to-end tokenization flows for Apple Pay, Samsung Pay and Google Pay, covering both the user perspective and the technical side beyond what customers see. I have also worked on authorization of financial transactions from the schemes perspective and on debugging logs.</p>
+    <p class="lead reveal">I work with PHP, CodeIgniter, AngularJS, JavaScript, MySQL, HTML, CSS and Bootstrap, with hands-on skills in backend development, database management, API integration and debugging, and I collaborate closely with development teams.</p>
+    <p class="lead reveal">I have tested end-to-end tokenization flows for Apple Pay, Samsung Pay and Google Pay, covering both the user perspective and the technical side beyond what customers see. I have also worked on authorization of financial transactions and on debugging logs across all of them.</p>
     <div class="pay">
       <span><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 6.9 1.2 9.2.8 1.1 1.7 2.3 2.9 2.3 1.1 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.8zM14.2 5.8c.6-.8 1.1-1.8.9-2.8-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.8-.9 2.7 1 .1 2-.5 2.6-1.3z"/></svg> Apple Pay</span>
       <span><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google Pay</span>
@@ -83,7 +85,7 @@
     <p class="lead reveal">A few things I've worked on.</p>
     <div class="cards">
       <article class="card reveal">
-        <img src="assets/images/maxxfitness.png" alt="Screenshot of the Maxx Fitness web app" loading="lazy" onerror="this.remove()">
+        <img src="assets/images/maxxfitness.png" alt="Screenshot of the Maxx Fitness web app" loading="lazy" decoding="async" onerror="this.remove()">
         <h3>Maxx Fitness</h3>
         <p>A web application built as a mini project during my undergraduate studies.</p>
         <div class="tags"><span>HTML</span><span>CSS</span><span>Bootstrap</span><span>JavaScript</span><span>jQuery</span><span>PHP</span><span>MySQL</span></div>
@@ -93,7 +95,7 @@
         </div>
       </article>
       <article class="card reveal">
-        <img src="assets/images/Greencheck.png" alt="Screenshot of the Compliance Survey software" loading="lazy" onerror="this.remove()">
+        <img src="assets/images/Greencheck.png" alt="Screenshot of the Compliance Survey software" loading="lazy" decoding="async" onerror="this.remove()">
         <h3>Compliance Survey</h3>
         <p>Software that helps suppliers and vendors take surveys, collect valuable information, and get reports and metrics.</p>
         <div class="tags"><span>PHP (CodeIgniter)</span><span>AngularJS</span><span>jQuery</span><span>MySQL</span></div>
@@ -106,7 +108,7 @@
 
   <section id="contact" class="wrap">
     <h2 class="reveal">Contact</h2>
-    <p class="lead reveal">Reach out to me via socials.</p>
+    <p class="lead reveal">The fastest way to reach me is X (Twitter) or email.</p>
     <div class="tiles reveal">
       <a href="https://x.com/sudhageeksout" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg><span>@sudhageeksout</span><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
       <a href="mailto:sudharsanm204@gmail.com" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M2 5.5A1.5 1.5 0 0 1 3.5 4h.7L12 9.9 19.8 4h.7A1.5 1.5 0 0 1 22 5.5v1.7l-10 7.5L2 7.2z"/><path fill="#4285F4" d="M2 7.2v11.3A1.5 1.5 0 0 0 3.5 20h3v-9.5z"/><path fill="#34A853" d="M22 7.2v11.3a1.5 1.5 0 0 1-1.5 1.5h-3v-9.5z"/><path fill="#FBBC04" d="M22 5.5v1.7l-4.5 3.3V6.9l1.6-1.2c.9-.7 2.9-.2 2.9-.2z"/></svg><span>sudharsanm204@gmail.com</span><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
@@ -118,8 +120,8 @@
   </section>
 </main>
 <footer>
-  <p>© <span id="yr"></span> All rights reserved.</p>
-  <p>Developed and maintained by Sudharsan.</p>
+  <p>© <span id="yr"></span> Sudharsan. All rights reserved.</p>
+  <p>Developed and maintained by Sudharsan</p>
 </footer>
 </body>
 </html>
